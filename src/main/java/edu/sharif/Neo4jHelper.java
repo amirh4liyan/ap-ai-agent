@@ -94,6 +94,10 @@ public class Neo4jHelper {
         String query = "MATCH (n) DETACH DELETE n";
         driver.session().run(query);
     }
+    public void deleteNodeType(String nodeType) {
+        String query = "MATCH (n:" + nodeType + ") DETACH DELETE n";
+        driver.session().run(query);
+    }
     public void deleteNode(String nodeType, String property, String value) {
         String cypherQuery;
         if (value.matches("\\d+"))
