@@ -11,24 +11,30 @@ import java.util.List;
 
 public class Neo4jHelper {
 
+    private static Neo4jHelper instance;
+
     private final String USER = "neo4j";
     private final String PASSWORD = "12345678";
     private String URL = "bolt://localhost:7687";
 
-    private Driver driver;
-    private CSVReader reader;
+    private final Driver driver;
     private List<String[]> rows;
 
-    public Neo4jHelper() {
+    private Neo4jHelper() {
         // Connect to Neo4j Database
         driver = GraphDatabase.driver(URL, AuthTokens.basic(USER, PASSWORD));
     }
 
+    public static Neo4jHelper getInstance() {
+        if (instance == null) {
+            instance = new Neo4jHelper();
+        }
+        return instance;
+    }
+
     public void readDataFromCSV(String FILENAME) {
-        try {
-            reader = new CSVReader(new FileReader(FILENAME));
+        try (CSVReader reader = new CSVReader(new FileReader(FILENAME))) {
             rows = reader.readAll();
-            reader.close();
             String msg = "[Neo4jHelper-LOG]: Read " + rows.size() + " rows from " + FILENAME;
             System.out.println(msg);
         } catch (IOException | CsvException e) {
