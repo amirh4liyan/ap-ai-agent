@@ -41,11 +41,15 @@ public class Neo4jHelper {
             throw new RuntimeException(e);
         }
     }
+
     public void insertAllNodes() {
         rows.removeFirst(); // remove first row since it isn't professor
         for (String[] row : rows) {
             insertNode(row);
         }
+    }
+    private void insertNodeType(String nodeType) {
+
     }
     private void insertNode(String[] items) {
         // TODO: handle empty or invalid input
@@ -84,6 +88,25 @@ public class Neo4jHelper {
                         "publications_file", publications_file
                 )
         );
+    }
+
+    private void deleteAllNodes() {
+        String query = "MATCH (n) DETACH DELETE n";
+        driver.session().run(query);
+    }
+    public void deleteNode(String nodeType, String property, String value) {
+        String cypherQuery;
+        if (value.matches("\\d+"))
+            cypherQuery = String.format("MATCH (n:%s {%s: %s}) DETACH DELETE n", nodeType, property, value);
+        else
+            cypherQuery = String.format("MATCH (n:%s {%s: '%s'}) DETACH DELETE n", nodeType, property, value);
+
+        try {
+            driver.session().run(cypherQuery);
+        } catch (Exception e) {
+            System.err.println("[Neo4jHelper-LOG]: Error executing Cypher query: " +
+                    e.getMessage());
+        }
     }
 
     private void setURL(String URL) {
