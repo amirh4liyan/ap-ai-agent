@@ -2,14 +2,11 @@ package edu.sharif;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-import org.neo4j.driver.AuthTokens;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
-import org.neo4j.driver.Values;
+
+import org.neo4j.driver.*;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.Signature;
 import java.util.List;
 
 public class Neo4jHelper {
@@ -38,7 +35,14 @@ public class Neo4jHelper {
             throw new RuntimeException(e);
         }
     }
+    public void insertAllNodes() {
+        rows.removeFirst(); // remove first row since it isn't professor
+        for (String[] row : rows) {
+            insertNode(row);
+        }
+    }
     private void insertNode(String[] items) {
+        // TODO: handle empty or invalid input
         int professor_id = Integer.parseInt(items[0]);
         String first_name = items[1];
         String last_name = items[2];
@@ -74,12 +78,6 @@ public class Neo4jHelper {
                         "publications_file", publications_file
                 )
         );
-    }
-    public void insertAllNodes() {
-        rows.removeFirst(); // remove first row since it isn't professor
-        for (String[] row : rows) {
-            insertNode(row);
-        }
     }
 
     private void setURL(String URL) {
