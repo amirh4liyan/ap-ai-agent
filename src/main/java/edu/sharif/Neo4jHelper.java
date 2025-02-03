@@ -1,24 +1,18 @@
 package edu.sharif;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
-
 import org.neo4j.driver.*;
+import org.neo4j.driver.Record;
+import org.neo4j.driver.types.Node;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 
 public class Neo4jHelper {
 
     private static Neo4jHelper instance;
-
+    private final Driver driver;
     private final String USER = "neo4j";
     private final String PASSWORD = "12345678";
     private String URL = "bolt://localhost:7687";
-
-    private final Driver driver;
-    private List<String[]> rows;
 
     private Neo4jHelper() {
         // Connect to Neo4j Database
@@ -32,78 +26,63 @@ public class Neo4jHelper {
         return instance;
     }
 
-    public void readDataFromCSV(String FILENAME) {
-        try (CSVReader reader = new CSVReader(new FileReader(FILENAME))) {
-            rows = reader.readAll();
-            String msg = "[Neo4jHelper-LOG]: Read " + rows.size() + " rows from " + FILENAME;
-            System.out.println(msg);
-        } catch (IOException | CsvException e) {
-            throw new RuntimeException(e);
-        }
+    // Should Stay Private
+    private void createNode(GraphEntity graphEntity) {
+        String nodeLabel = graphEntity.getLabel();
+        String uniqueProperty = graphEntity.getUniqueKey();
+        String query = "CREATE (n:" +
+                nodeLabel +
+                " {" +
+                uniqueProperty +
+                ": $props." + uniqueProperty + "}) " +
+                "SET n += $props";
+        driver.session().writeTransaction(tx -> tx.run(query, Values.parameters("props", graphEntity.getMap())));
     }
 
-    public void insertAllNodes() {
-        rows.removeFirst(); // remove first row since it isn't professor
-        for (String[] row : rows) {
-            insertNode(row);
-        }
+    public void mergeNode(GraphEntity graphEntity) {
+        String nodeLabel = graphEntity.getLabel();
+        String uniqueProperty = graphEntity.getUniqueKey();
+        String query = "MERGE (n:" +
+                nodeLabel +
+                " {" +
+                uniqueProperty +
+                ": $props." +
+                uniqueProperty +
+                "}) ON CREATE SET n += $props";
+        driver.session().writeTransaction(tx -> tx.run(query, Values.parameters("props", graphEntity.getMap())));
     }
-    private void insertNodeType(String nodeType) {
+    public Map<String, Object> getNode(GraphEntity graphEntity) {
+        String nodeLabel = graphEntity.getLabel();
+        String uniqueProperty = graphEntity.getUniqueKey();
+        String query = "MATCH (n:" + nodeLabel + " {" + uniqueProperty + ": $VALUE}) RETURN n";
 
+        return driver.session().readTransaction(tx -> {
+            Record record = tx.run(query, Values.parameters(
+                    "VALUE", graphEntity.getUniqueValue()
+            )).single();
+            Node node = record.get("n").asNode();
+            return node.asMap();
+        });
     }
-    private void insertNode(String[] items) {
-        // TODO: handle empty or invalid input
-        int professor_id = Integer.parseInt(items[0]);
-        String first_name = items[1];
-        String last_name = items[2];
-        String email = items[3];
-        String department = items[4];
-        String teaching = items[5];
-        int collaboration_start_year = Integer.parseInt(items[6]);
-        String research_interests = items[7];
-        String publications_file = items[8];
-
-        String cypherQuery = "CREATE (n:Professor {" +
-                "professor_id: $professor_id," +
-                "first_name: $first_name," +
-                "last_name: $last_name," +
-                "email: $email," +
-                "department: $department," +
-                "teaching: $teaching," +
-                "collaboration_start_year: $collaboration_start_year," +
-                "research_interests: $research_interests," +
-                "publications_file: $publications_file})";
-
-        driver.session().run(
-                cypherQuery,
-                Values.parameters(
-                        "professor_id", professor_id,
-                        "first_name", first_name,
-                        "last_name", last_name,
-                        "email", email,
-                        "department", department,
-                        "teaching", teaching,
-                        "collaboration_start_year", collaboration_start_year,
-                        "research_interests", research_interests,
-                        "publications_file", publications_file
-                )
-        );
+    public void updateNode(GraphEntity graphEntity) {
+        String nodeLabel = graphEntity.getLabel();
+        String uniqueProperty = graphEntity.getUniqueKey();
+        String query = "MERGE (n:" +
+                nodeLabel +
+                " {" +
+                uniqueProperty +
+                ": $props." +
+                uniqueProperty +
+                "}) ON MATCH SET n += $props";
+        driver.session().writeTransaction(tx -> tx.run(query, Values.parameters("props", graphEntity.getMap())));
     }
-
-    private void deleteAllNodes() {
-        String query = "MATCH (n) DETACH DELETE n";
-        driver.session().run(query);
-    }
-    public void deleteNodeType(String nodeType) {
-        String query = "MATCH (n:" + nodeType + ") DETACH DELETE n";
-        driver.session().run(query);
-    }
-    public void deleteNode(String nodeType, String property, String value) {
+    public void deleteNode(GraphEntity graphEntity) {
+        String nodeLabel = graphEntity.getLabel();
+        String uniqueProperty = graphEntity.getUniqueKey();
+        Object uniqueValue = graphEntity.getUniqueValue();
+        Map<String, Object> map = graphEntity.getMap();
         String cypherQuery;
-        if (value.matches("\\d+"))
-            cypherQuery = String.format("MATCH (n:%s {%s: %s}) DETACH DELETE n", nodeType, property, value);
-        else
-            cypherQuery = String.format("MATCH (n:%s {%s: '%s'}) DETACH DELETE n", nodeType, property, value);
+        cypherQuery = String.format("MATCH (n:%s {%s: %s}) DETACH DELETE n", nodeLabel, uniqueProperty, uniqueValue);
 
         try {
             driver.session().run(cypherQuery);
@@ -111,6 +90,15 @@ public class Neo4jHelper {
             System.err.println("[Neo4jHelper-LOG]: Error executing Cypher query: " +
                     e.getMessage());
         }
+    }
+
+    private void deleteAllNodes() {
+        String query = "MATCH (n) DETACH DELETE n";
+        driver.session().run(query);
+    }
+    public void deleteNodeType(GraphEntity graphEntity) {
+        String query = "MATCH (n:" + graphEntity.getLabel() + ") DETACH DELETE n";
+        driver.session().run(query);
     }
 
     private void setURL(String URL) {
