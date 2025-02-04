@@ -28,6 +28,7 @@ public class Professor implements GraphEntity {
         publications_file = publicationsFile;
     }
 
+    @Override
     public void sync() {
         Neo4jHelper neo = Neo4jHelper.getInstance();
         System.out.println(neo.getNode(this));
@@ -92,4 +93,78 @@ public class Professor implements GraphEntity {
         map.put("publications_file", publications_file);
         return map;
     }
+
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public String getTeaching() {
+        return teaching;
+    }
+
+    public void setTeaching(String teaching) {
+        this.teaching = teaching;
+    }
+
+    public String getCollaboration_start_year() {
+        return collaboration_start_year;
+    }
+
+    public void setCollaboration_start_year(String collaboration_start_year) {
+        this.collaboration_start_year = collaboration_start_year;
+    }
+
+    public String getResearch_interests() {
+        return research_interests;
+    }
+
+    public void setResearch_interests(String research_interests) {
+        this.research_interests = research_interests;
+    }
+
+    public String getPublications_file() {
+        return publications_file;
+    }
+
+    public void setPublications_file(String publications_file) {
+        this.publications_file = publications_file;
+    }
+
 }
