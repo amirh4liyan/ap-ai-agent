@@ -12,11 +12,11 @@ public class Neo4jHelper {
     private final Driver driver;
     private final String USER = "neo4j";
     private final String PASSWORD = "12345678";
-    private String URL = "bolt://localhost:7687";
+    private String url = "bolt://localhost:7687";
 
     private Neo4jHelper() {
         // Connect to Neo4j Database
-        driver = GraphDatabase.driver(URL, AuthTokens.basic(USER, PASSWORD));
+        driver = GraphDatabase.driver(url, AuthTokens.basic(USER, PASSWORD));
     }
 
     public static Neo4jHelper getInstance() {
@@ -38,7 +38,6 @@ public class Neo4jHelper {
                 "SET n += $props";
         driver.session().writeTransaction(tx -> tx.run(query, Values.parameters("props", graphEntity.getMap())));
     }
-
     public void mergeNode(GraphEntity graphEntity) {
         String nodeLabel = graphEntity.getLabel();
         String uniqueProperty = graphEntity.getUniqueKey();
@@ -101,10 +100,10 @@ public class Neo4jHelper {
         driver.session().run(query);
     }
 
-    private void setURL(String URL) {
-        this.URL = URL;
+    private void setUrl(String url) {
+        this.url = url;
     }
-    private String getURL() {
-        return URL;
+    private String getUrl() {
+        return url;
     }
 }
