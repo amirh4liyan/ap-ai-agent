@@ -12,4 +12,6 @@ public interface GraphEntity {
     public String[] getProperties();
     public List<Object> getValues();
     public Map<String, Object> getMap();
+
+    public void sync();
 }
