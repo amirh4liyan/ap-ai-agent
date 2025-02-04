@@ -1,4 +1,5 @@
 package edu.sharif;
 
-public class AbstractLLMClient {
+public abstract class AbstractLLMClient {
+    
 }
