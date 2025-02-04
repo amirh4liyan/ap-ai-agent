@@ -3,6 +3,7 @@ package edu.sharif;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,19 +26,22 @@ public class CSVHelper {
             return reader.lines()
                     .skip(1)
                     .map(line -> line.split(","))
-                    .map(data ->
-                            new Professor (
-                                Integer.parseInt(data[0]),
-                                data[1],
-                                data[2],
-                                data[3],
-                                data[4],
-                                data[5],
-                                data[6],
-                                data[7],
-                                data[8]
-                            )
-                    )
+                    .map(data -> {
+                        String[] cleanedData = Arrays.stream(data)
+                                .map(s -> s.replaceAll("^\"|\"$", ""))
+                                .toArray(String[]::new);
+                        return new Professor(
+                                Integer.parseInt(cleanedData[0]),
+                                cleanedData[1],
+                                cleanedData[2],
+                                cleanedData[3],
+                                cleanedData[4],
+                                cleanedData[5],
+                                cleanedData[6],
+                                cleanedData[7],
+                                cleanedData[8]
+                        );
+                    })
                     .collect(Collectors.toList());
         }
     }
