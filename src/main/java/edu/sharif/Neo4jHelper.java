@@ -100,6 +100,15 @@ public class Neo4jHelper {
         driver.session().run(query);
     }
 
+    public Result execQuery(String query) {
+        try {
+            return driver.session().run(query);
+        } catch (Exception e) {
+            System.err.println("[Neo4jHelper-LOG]: Error executing Cypher query: " + e.getMessage());
+            return null;
+        }
+    }
+
     private void setUrl(String url) {
         this.url = url;
     }
