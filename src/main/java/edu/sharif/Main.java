@@ -20,7 +20,10 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        String prompt = "";
+        String prompt = "i want to take algorithm course this term, which professor you suggest?";
 
+        OpenAiClient gpt = OpenAiClient.getInstance();
+        String response = gpt.generateCypherQuery(prompt);
+        System.out.println(response);
     }
 }
