@@ -6,10 +6,11 @@ import org.neo4j.driver.types.Node;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
 
-    final static String FILENAME = "/home/amirhossein/Desktop/tmp2.csv";
+    final static String FILENAME = "/home/amirhossein/IdeaProjects/ap-ai-agent/data/profs.csv";
     static List<Professor> professors;
 
     public static void main(String[] args) {
@@ -24,15 +25,15 @@ public class Main {
         }
 
         //String prompt = "USER_PROMPT=\"i want to take Data Structures course this term, which professor you suggest?\" Write a Cypher query based on USER_PROMPT that retrieves professors from the database. they should be match (use CONTAIN) based on n.teaching or n.research_interest field. Only return the Cypher query, no extra text, explanations, or comments. Example 1: MATCH (n:Professor) WHERE n.teaching CONTAINS '' OR n.research_interests CONTAINS ''  RETURN n ORDER BY n.collaboration_start_year ASC\"";
-        String prompt = "i want take Data Structures course this term, which professor you suggest?";
+        //String prompt = "i want take Data Structures course this term, which professor you suggest?";
+        String prompt = "";
+        System.out.print("[in-str]: ");
+        Scanner sc = new Scanner(System.in);
+        prompt = sc.nextLine();
 
-
-        var llm = OpenAiClient.getInstance();
+        var llm = OllamaClient.getInstance();
         llm.generateCypherQuery(prompt);
         String response = llm.getQuery();
-        //String response = "MATCH (p:Professor) WHERE p.teaching CONTAINS 'Data Structures' RETURN p ORDER BY p.collaboration_start_year ASC";
-
-        //String response = "{ \"id\": \"chatcmpl-AxalNTxFT7PWZJ0J7oeR3JdpBIHYv\", \"object\": \"chat.completion\", \"created\": 1738766033, \"model\": \"gpt-4-0613\", \"choices\": [ { \"index\": 0, \"message\": { \"role\": \"assistant\", \"content\": \"MATCH (p:Professor) WHERE p.teaching CONTAINS 'Data Structures' RETURN p.first_name, p.last_name, p.email ORDER BY p.collaboration_start_year ASC\", \"refusal\": null }, \"logprobs\": null, \"finish_reason\": \"stop\" } ], \"usage\": { \"prompt_tokens\": 229, \"completion_tokens\": 37, \"total_tokens\": 266, \"prompt_tokens_details\": { \"cached_tokens\": 0, \"audio_tokens\": 0 }, \"completion_tokens_details\": { \"reasoning_tokens\": 0, \"audio_tokens\": 0, \"accepted_prediction_tokens\": 0, \"rejected_prediction_tokens\": 0 } }, \"service_tier\": \"default\", \"system_fingerprint\": null }";
 
         System.out.println("Extracted Content: " + response);
 
@@ -44,8 +45,10 @@ public class Main {
 
                 if (record.containsKey("p")) {
                     Node node = record.get("p").asNode();
-                    String name = node.get("last_name").asString();
-                    System.out.println("Last Name: " + name);
+                    String first_name = node.get("first_name").asString();
+                    String last_name = node.get("last_name").asString();
+                    String email = node.get("email").asString();
+                    System.out.println(first_name + "    " + last_name + "    " + email);
                 } else {
                     System.out.println("No 'p' field in this record.");
                 }
