@@ -40,10 +40,10 @@ public class OllamaClient extends AbstractLLMClient {
                     userPrompt
             );
 
-            // چاپ jsonPayload برای بررسی صحت آن
+            // Printing payload for double-checking
             System.out.println(jsonPayload);
 
-            // ارسال درخواست به Ollama API
+            // Send POST request to Ollama
             HttpClient client = HttpClient.newBuilder()
                     .version(HttpClient.Version.HTTP_2)
                     .build();
@@ -57,10 +57,9 @@ public class OllamaClient extends AbstractLLMClient {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             System.out.println(response.body());
-            // پردازش پاسخ و استخراج فیلد "response"
-            JsonNode jsonNode = this.parseJson(response.body());
 
-            // استخراج محتوای فیلد "response"
+            // Process Data of "respond" field
+            JsonNode jsonNode = this.parseJson(response.body());
             if (jsonNode.has("response")) {
                 super.query = jsonNode.get("response").asText().trim().replace("\n", " ");
                 super.query = super.query.replace("`", "").replace("\n", " ").trim();
