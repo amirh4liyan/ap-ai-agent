@@ -27,11 +27,11 @@ public class OpenAiClient extends AbstractLLMClient {
     @Override
     public void generateCypherQuery(String userInput) {
         try {
-            // آماده کردن داده‌های ورودی
+            // Prepare Prompt
             String prompt1 = String.format("USER_REQUEST='%s'", userInput);
             String jsonPayload = getString(prompt1);
 
-            // ارسال درخواست به OpenAI API
+            // Send POST Request to OpenAI
             HttpClient client = HttpClient.newBuilder()
                     .version(HttpClient.Version.HTTP_2)
                     .build();
@@ -45,7 +45,7 @@ public class OpenAiClient extends AbstractLLMClient {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // پردازش پاسخ و استخراج محتوای بخش content
+            // Process data of "content" field
             JsonNode jsonNode = this.parseJson(response.body());
 
             JsonNode choicesNode = jsonNode.get("choices");
